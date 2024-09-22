@@ -28,38 +28,68 @@ function Row({rowId}) {
   return <div id={id} class="board-row"></div>;
 }
 
-export default function Board() {
-  /*Array(9).fill(null) creates an array with nine elements and sets each of them to null. 
-  The useState() call around it declares a squares state variable that’s initially set to that array. 
-  Each entry in the array corresponds to the value of a square*/
-  const [squares, setSquares] = useState(Array(9).fill(null));
+function Board(xIsNext, squares, onPlay) {
+  // /*Array(9).fill(null) creates an array with nine elements and sets each of them to null. 
+  // The useState() call around it declares a squares state variable that’s initially set to that array. 
+  // Each entry in the array corresponds to the value of a square*/
+  // const [squares, setSquares] = useState(Array(9).fill(null));
 
-  //this makes it so that the X player always plays first on the start of the game. 
-  const [xIsNext, setXIsNext] = useState(true); 
+  // //this makes it so that the X player always plays first on the start of the game. 
+  // const [xIsNext, setXIsNext] = useState(true); 
+  
+  // // const [status, setStatus] = useState("");
 
-  const [status, setStatus] = useState("");
 
-  //handle what happens when a square is clicked. 
   function handleClick(i){
-    //establish nextSquares as just the squares array. Slice with no params just returns the array.
-    //we do this to reinforce immutability standards
-    if(squares[i]){
+    if(calculateWinner(squares) || squares[i]){
       return;
     }
     const nextSquares = squares.slice();
     if(xIsNext){
       nextSquares[i] = "X";
-      setXIsNext(false);
     }else{
       nextSquares[i] = "O";
-      setXIsNext(true);
     }
-    setSquares(nextSquares);
-    if(calculateWinner(squares)){
-      setStatus(calculateWinner(squares) + " is the winner");
-      return;
-    }
-  }  
+    onPlay(nextSquares);
+  }
+
+  const winner = calculateWinner(squares);
+  let status;
+  if(winner){
+    status = "Winner: " + winner;
+  }else{
+    status = "Next player: " + (xIsNext ? "X" : "O");
+  }
+
+
+  
+  
+  
+  
+  
+
+
+  // //handle what happens when a square is clicked. 
+  // function handleClick(i){
+  //   //establish nextSquares as just the squares array. Slice with no params just returns the array.
+  //   //we do this to reinforce immutability standards
+  //   if(squares[i] || calculateWinner(squares)){
+  //     return;
+  //   }
+  //   const nextSquares = squares.slice();
+  //   if(xIsNext){
+  //     nextSquares[i] = "X";
+  //     setXIsNext(false);
+  //   }else{
+  //     nextSquares[i] = "O";
+  //     setXIsNext(true);
+  //   }
+  //   setSquares(nextSquares);
+  //   if(calculateWinner(squares)){
+  //     setStatus(calculateWinner(squares) + " is the winner");
+  //     return;
+  //   }
+  // }  
 
   //for handle click, we use the () => handleClick(0) syntax
   //basically, () is just a new function that we want the square to run when clicked. 
@@ -93,30 +123,8 @@ export default function Board() {
 
 
 
-//builds the squares of the board
-function BuildBoard(dimensions) {
-  // //3 columns of  3 rows of buttons. 
-  // var board = null;
 
-
-  // //iterate through rows
-  // for (let index = 0; index < dimensions+1; index++) {
-  //   var rowId = "row"+index;
-  //   board += <Row id={index}/>
-    
-  //   //iterate through columns
-  //   for (let index = 0; index < dimensions+1; index++){
-  //     var row = document.getElementById("rowId"+index);
-  //     row += <Square id='1'/>
-  //   }
-    
-  // }
-
-  // return board;
-}
-
-
-
+//only returns a value if there is a winner. otherwise, its null
 function calculateWinner(squares) {
   //same value on any of these lines would be a winning line. 
   const lines = [
@@ -139,3 +147,54 @@ function calculateWinner(squares) {
   }
   return null;
 }
+
+export default function Game(){
+  const [xIsNext, setXIsNext] = useState(true);
+  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const currentSquares = history[history.length-1];
+
+  function handlePlay(nextSquares) {
+    setHistory([...history, nextSquares]);
+    setXIsNext(!xIsNext);
+  }
+
+  return (
+    <>
+      <div className='game'>
+        <div className='game-board'>
+          <Board xIsNext={xIsNext} currentSquares={currentSquares} onPlay={handlePlay}/>
+        </div>
+      </div>
+      <div className='game-info'>
+        <ol></ol>
+      </div>
+    </>
+  )
+}
+
+
+
+
+
+//builds the squares of the board
+function BuildBoard(dimensions) {
+  // //3 columns of  3 rows of buttons. 
+  // var board = null;
+
+
+  // //iterate through rows
+  // for (let index = 0; index < dimensions+1; index++) {
+  //   var rowId = "row"+index;
+  //   board += <Row id={index}/>
+    
+  //   //iterate through columns
+  //   for (let index = 0; index < dimensions+1; index++){
+  //     var row = document.getElementById("rowId"+index);
+  //     row += <Square id='1'/>
+  //   }
+    
+  // }
+
+  // return board;
+}
+
