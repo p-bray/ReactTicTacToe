@@ -281,19 +281,42 @@ function Board({ xIsNext, squares, onPlay }) {
 }
 
 export default function Game() {
-  const [xIsNext, setXIsNext] = useState(true);
+  //properties for history, player order, and current boardState
+  // const [xIsNext, setXIsNext] = useState(true);
+  const [currentMove, setCurrentMove] = useState(0);
+  const xIsNext = currentMove % 2 === 0;
   const [history, setHistory] = useState([Array(9).fill(null)]);
-  const currentSquares = history[history.length - 1];
+  //current move
+  //gets the last board state in the history
+  const currentSquares = history[currentMove];
 
+  //
   function handlePlay(nextSquares) {
-    setHistory([...history, nextSquares]);
-    setXIsNext(!xIsNext);
+    //Here, [...history, nextSquares] creates a new array that contains all the items in history,
+    // followed by nextSquares. (You can read the ...history spread syntax as “enumerate all the 
+    //items in history”.)
+    // setHistory([...history, nextSquares]);
+
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length-1);
+
+
+    //sets xIsNext to its opposite value
+    // setXIsNext(!xIsNext);
   }
 
   function jumpTo(nextMove) {
-    // TODO
+    setCurrentMove(nextMove);
+    // setXIsNext(nextMove % 2 === 0);
+    console.log(nextMove);
+    console.log(xIsNext);
   }
 
+  //looks at the history, then determines how to build the li for each move of the moves list
+  //Uses the map method to essentially loop through each element of the array,
+  //executing a function with that element. 
+  //only call map if you actually need to use the newly returned array. 
   const moves = history.map((squares, move) => {
     let description;
     if (move > 0) {
@@ -301,13 +324,16 @@ export default function Game() {
     } else {
       description = 'Go to game start';
     }
-    return (
-      <li>
+    //compose the li for each move
+    //we use key for React to know which li is which upon being re-rendered. 
+    return ( 
+      <li key={move}>
         <button onClick={() => jumpTo(move)}>{description}</button>
       </li>
     );
   });
 
+  //compose the moves list
   return (
     <div className="game">
       <div className="game-board">
